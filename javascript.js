@@ -1,7 +1,8 @@
 let svg;
 let legend;
 let xScale;
-let scaleBand = ['15', '25', '35', '45', '55']
+let scaleBand = ['0', '15', '25', '35', '45', '55', '100']
+let xScaleBand = ['15', '25', '35', '45', '55', '100']
 let edData;
 let countyData;
 
@@ -39,13 +40,29 @@ const generateSvg = () => {
 
     legend = d3.select('#legend')
                .append('svg')
-               .attr('width', 500)
+               .attr('width', 550)
                .attr('height', 200);
 
     xScale = d3.scaleBand()
                .domain(scaleBand)
-               .range([250, 500]);
+               .range([200, 500]);
+
+    const legendX = d3.axisBottom(xScale);
+    
+    legend.append('g').attr('transform', `translate(0, 40)`).call(legendX.tickFormat(d => d + '%'))
+    
+    legend.selectAll('rect')
+          .data(xScaleBand)
+          .enter()
+          .append('rect')
+          .attr('width', 40)
+          .attr('height', 10)
+          .attr('x', (d, i) => xScale(xScaleBand[i]) - 20)
+          .attr('y', 30)
+          .attr('fill', (d) => returnLegendFill(d));
 }
+
+const tooltip = d3.select('#canvas-div').append('div').attr('id', 'tooltip').style('position', 'absolute')
 
 const returnFill = (fip) => {
     for (let i = 0; i < edData.length; i++) {
@@ -84,4 +101,20 @@ const returnEd = (action, fip) => {
             }
         }
     }
+}
+
+const returnLegendFill = (num) => {
+        if (num == 15) {
+            return '#B7B2FF';
+        } else if (num == '25') {
+            return '#968FFF';
+        } else if (num == '35') {
+            return '#756BFF';
+        } else if (num == '45') {
+            return '#4A3DFF';
+        } else if (num == '55') {
+            return '#1F0FFF';
+        } else {
+            return '#1100FC';
+        }
 }
