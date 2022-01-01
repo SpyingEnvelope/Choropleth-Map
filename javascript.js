@@ -1,3 +1,9 @@
+//jQuery
+
+$(document).mousemove(function(event) {
+    $('#tooltip').css('left', event.clientX + 'px').css('top', event.clientY + 'px')
+})
+
 let svg;
 let legend;
 let xScale;
@@ -7,7 +13,7 @@ let edData;
 let countyData;
 
 const w = 1000;
-const h = 700;
+const h = 600;
 
 fetch('https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/for_user_education.json')
      .then(response => response.json())
@@ -36,7 +42,10 @@ const generateSvg = () => {
        .attr('fill', (d) => returnFill(d.id))
        .attr('data-fips', (d) => d.id)
        .attr('data-education', (d) => returnEd('ed', d.id))
-       .attr('data-state', (d) => returnEd('state', d.id));
+       .attr('data-state', (d) => returnEd('state', d.id))
+       .attr('data-county', (d) => returnEd('county', d.id))
+       .on('mouseover', (event) => tooltip.style('opacity', '1').attr('data-education', event.currentTarget.dataset.education).html(`State: ${event.currentTarget.dataset.state} <br> ${event.currentTarget.dataset.county} <br> Percentage: ${event.currentTarget.dataset.education}%`))
+       .on('mouseout', (event) => tooltip.style('opacity', '0'));
 
     legend = d3.select('#legend')
                .append('svg')
@@ -60,6 +69,7 @@ const generateSvg = () => {
           .attr('x', (d, i) => xScale(xScaleBand[i]) - 20)
           .attr('y', 30)
           .attr('fill', (d) => returnLegendFill(d));
+
 }
 
 const tooltip = d3.select('#canvas-div').append('div').attr('id', 'tooltip').style('position', 'absolute')
@@ -91,13 +101,16 @@ const returnEd = (action, fip) => {
                 return edData[i].bachelorsOrHigher;
             }
         }
+    } else if (action == 'state') {
+        for (let i = 0; i < edData.length; i++) {
+            if (edData[i].fips == fip) {
+                return edData[i].state
+            }
+        }
     } else {
         for (let i = 0; i < edData.length; i++) {
             if (edData[i].fips == fip) {
-                return {
-                    state: edData[i].state,
-                    county: edData[i]['area_name']
-                }
+                return edData[i]['area_name']
             }
         }
     }
